@@ -39,16 +39,19 @@ Compiler = (node, options) ->
           name = attr.name
           val = attr.val
 
-          if 'class' != name && visited[name]
+          if 'class' == name
+            name = 'className'
+
+          if 'className' != name && visited[name]
             throw new Error('Duplicate key ' + JSON.stringify(name) + ' is not allowed.')
           visited[name] = true
 
-          if 'class' == name
+          if 'className' == name
             gatheredClassNames.push val
           else
             normalized[name] = val
 
-        if visited['class']
+        if visited['className']
           constantClassNames = []
           dynamicClassNames = []
           for className in gatheredClassNames
@@ -61,7 +64,7 @@ Compiler = (node, options) ->
           if constantClassNames.length
             classNames.push JSON.stringify(constantClassNames.join(' '))
 
-          normalized['class'] = classNames.concat(dynamicClassNames).join(' + " " + ')
+          normalized['className'] = classNames.concat(dynamicClassNames).join(' + " " + ')
 
         pairs = []
         for name, val of normalized
