@@ -17,5 +17,20 @@
     "gulp": "~3.5.0",
     "gulp-mocha": "~0.4.1",
     "chai": "~1.8.1"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/duncanbeevers/jade-react.git"
+  },
+  "keywords": [
+    "jade",
+    "react",
+    "jsx"
+  ],
+  "bugs": {
+    "url": "https://github.com/duncanbeevers/jade-react/issues"
   }
 }
