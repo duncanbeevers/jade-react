@@ -13,5 +13,4 @@ chai.use (chai, utils) ->
     transform = utils.flag(this, 'transform')
 
     actualOutput = transform()
-    console.log 'actual'
     new Assertion(output).to.equal(actualOutput)

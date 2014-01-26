@@ -11,7 +11,6 @@ describe 'compile', ->
 
   fixturesDir = 'test/fixtures/'
   fixtures = fs.readdirSync(fixturesDir)
-  console.log JSON.stringify(fixtures)
   inputs = fixtures.filter (fixture) -> /\.jade$/.test(fixture)
 
   for inputFileName in inputs
@@ -22,5 +21,4 @@ describe 'compile', ->
       output = String(fs.readFileSync(fixturesDir + outputFileName))
 
       it 'compiles ' + inputFileName + ' to ' + outputFileName, ->
-        # expect(render).to.transform(markup)
         expect(render).to.transform(markup).into(output)
