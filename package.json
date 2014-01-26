@@ -1,0 +1,21 @@
+{
+  "name": "jade-react",
+  "version": "0.1.0",
+  "description": "Compile Jade to React components",
+  "main": "src/main.coffee",
+  "scripts": {
+    "test": "gulp test --require coffee-script"
+  },
+  "author": "Duncan Beevers",
+  "license": "WTFPL",
+  "dependencies": {
+    "coffee-script": "~1.6.3",
+    "jade": "~1.1.5",
+    "constantinople": "~1.0.2"
+  },
+  "devDependencies": {
+    "gulp": "~3.5.0",
+    "gulp-mocha": "~0.4.1",
+    "chai": "~1.8.1"
+  }
+}
