@@ -3,11 +3,20 @@ toConstant = require('constantinople').toConstant
 
 Compiler = (node, options) ->
   compile: ->
+    depth = -1
+    seenDepth0 = false
+
     visitTag = (tag) ->
+      depth += 1
+      if 0 == depth && seenDepth0
+        throw new Error('Component may have no more than one root node')
+      seenDepth0 = true
+
       buffer('React.DOM.' + tag.name + '(')
       visitAttributes(tag.attrs, tag.attributeBlocks)
       visitArgs(tag)
       buffer(')')
+      depth -= 1
 
     visitArgs = (node) ->
       len = node.block.nodes.length

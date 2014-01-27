@@ -5,12 +5,8 @@ chai.use (chai, utils) ->
 
   Assertion.addMethod 'transform', (input) ->
     transform = @_obj
-
-    fn = -> transform(input)
-    utils.flag(this, 'transform', fn)
+    new Assertion(-> transform(input))
 
   Assertion.addMethod 'into', (output) ->
-    transform = utils.flag(this, 'transform')
-
-    actualOutput = transform()
+    actualOutput = @_obj()
     new Assertion(output).to.equal(actualOutput)
