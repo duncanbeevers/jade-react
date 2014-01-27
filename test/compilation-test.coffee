@@ -29,3 +29,6 @@ describe 'compile', ->
   catch setupError
     it 'should not have failed to setup fixture tests', ->
       expect(-> throw setupError).not.to.throw()
+
+  it 'should not compile multiple root nodes', ->
+    expect(render).transform('p\np\n').to.throw()
