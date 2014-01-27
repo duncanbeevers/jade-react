@@ -20,7 +20,7 @@ Compiler = (node, options) ->
       for node, i in node.block.nodes
         visit(node)
         if i + 1 < len
-          buffer(' + ')
+          buffer(', ')
 
     visitBlock = (block) ->
       len = block.nodes.length
