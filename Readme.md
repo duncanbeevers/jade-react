@@ -31,8 +31,8 @@ React.DOM.a({"href":dynamic}) +
 React.DOM.p(null, "Static Content") +
 React.DOM.p(null, dynamicContent) +
 React.DOM.p(null, "Text") +
-React.DOM.p(null, "Multiline Text 1" + "Multiline Text 2") +
-React.DOM.ul(null, React.DOM.li(null, "List Item") + React.DOM.li(null, dynamicListItem)) +
+React.DOM.p(null, "Multiline Text 1", "Multiline Text 2") +
+React.DOM.ul(null, React.DOM.li(null, "List Item"), React.DOM.li(null, dynamicListItem)) +
 React.DOM.div({"className":"staticClass1 staticClass2"}) +
 React.DOM.div({"className":"staticClass1" + " " + dynamicClass2})
 ````
