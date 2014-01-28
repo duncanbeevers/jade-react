@@ -71,70 +71,70 @@ Compiler = (node, options) ->
           bufferExpression(' + \n')
 
     visitAttributes = (attrs, attributeBlocks) ->
-      if attrs && attrs.length
-        visited = {}
-        gatheredClassNames = []
-        normalized = {}
-
-        for attr in attrs
-          name = attr.name
-          val = attr.val
-
-          if 'class' == name
-            name = 'className'
-
-          if 'className' != name && visited[name]
-            throw new Error('Duplicate key ' + JSON.stringify(name) + ' is not allowed.')
-          visited[name] = true
-
-          if 'className' == name
-            gatheredClassNames.push val
-          else
-            normalized[name] = val
-
-        if visited['className']
-          constantClassNames = []
-          dynamicClassNames = []
-          for className in gatheredClassNames
-            if isConstant(className)
-              constantClassNames.push toConstant(className)
-            else
-              dynamicClassNames.push className
-
-          classNames = []
-          if constantClassNames.length
-            classNames.push JSON.stringify(constantClassNames.join(' '))
-
-          normalized['className'] = classNames.concat(dynamicClassNames).join(' + " " + ')
-
-        pairs = []
-        for name, val of normalized
-          pairs.push([name, val])
-
-        # Lexically sort by attribute name
-        pairs.sort(pairSort)
-
-        if pretty
-            sep = ': '
-          else
-            sep = ':'
-        pairs = pairs.map (pair) ->
-          [name, val] = pair
-          JSON.stringify(name) + sep + val
-
-        bufferExpression('{')
-        if pretty
-          depth += 1
-          bufferExpression('\n' + indentToDepth())
-          bufferExpression(pairs.join(',\n' + indentToDepth()))
-          depth -= 1
-          bufferExpression('\n' + indentToDepth())
-        else
-          bufferExpression(pairs.join(','))
-        bufferExpression('}')
-
-      else
+      unless attrs && attrs.length
         bufferExpression('null')
+        return
+
+      visited = {}
+      gatheredClassNames = []
+      normalized = {}
+
+      for attr in attrs
+        name = attr.name
+        val = attr.val
+
+        if 'class' == name
+          name = 'className'
+
+        if 'className' != name && visited[name]
+          throw new Error('Duplicate key ' + JSON.stringify(name) + ' is not allowed.')
+        visited[name] = true
+
+        if 'className' == name
+          gatheredClassNames.push val
+        else
+          normalized[name] = val
+
+      if visited['className']
+        constantClassNames = []
+        dynamicClassNames = []
+        for className in gatheredClassNames
+          if isConstant(className)
+            constantClassNames.push toConstant(className)
+          else
+            dynamicClassNames.push className
+
+        classNames = []
+        if constantClassNames.length
+          classNames.push JSON.stringify(constantClassNames.join(' '))
+
+        normalized['className'] = classNames.concat(dynamicClassNames).join(' + " " + ')
+
+      pairs = []
+      for name, val of normalized
+        pairs.push([name, val])
+
+      # Lexically sort by attribute name
+      pairs.sort(pairSort)
+
+      if pretty
+          sep = ': '
+        else
+          sep = ':'
+      pairs = pairs.map (pair) ->
+        [name, val] = pair
+        JSON.stringify(name) + sep + val
+
+      bufferExpression('{')
+      if pretty
+        depth += 1
+        bufferExpression('\n' + indentToDepth())
+        bufferExpression(pairs.join(',\n' + indentToDepth()))
+        depth -= 1
+        bufferExpression('\n' + indentToDepth())
+      else
+        bufferExpression(pairs.join(','))
+      bufferExpression('}')
 
     visitCode = (code) ->
       return unless code
