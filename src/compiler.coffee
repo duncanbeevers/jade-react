@@ -12,16 +12,16 @@ Compiler = (node, options) ->
         throw new Error('Component may have no more than one root node')
       seenDepth0 = true
 
-      buffer('React.DOM.' + tag.name + '(')
+      bufferExpression('React.DOM.' + tag.name + '(')
       visitAttributes(tag.attrs, tag.attributeBlocks)
       visitArgs(tag)
-      buffer(')')
+      bufferExpression(')')
       depth -= 1
 
     visitArgs = (node) ->
       len = node.block.nodes.length
       if node.code || len
-        buffer(', ')
+        bufferExpression(',\n')
 
       if node.code
         visitCode(node.code)
@@ -29,14 +29,14 @@ Compiler = (node, options) ->
       for node, i in node.block.nodes
         visit(node)
         if i + 1 < len
-          buffer(', ')
+          bufferExpression(', ')
 
     visitBlock = (block) ->
       len = block.nodes.length
       for node, i in block.nodes
         visit(node)
         if i + 1 < len
-          buffer(' + \n')
+          bufferExpression(' + \n')
 
     visitAttributes = (attrs, attributeBlocks) ->
       if attrs && attrs.length
@@ -79,31 +79,31 @@ Compiler = (node, options) ->
         for name, val of normalized
           pairs.push(JSON.stringify(name) + ':' + val)
 
-        buffer('{' + pairs.join(',') + '}')
+        bufferExpression('{' + pairs.join(',') + '}')
 
       else
-        buffer('null')
+        bufferExpression('null')
 
     visitCode = (code) ->
       return unless code
-      buffer(code.val)
+      bufferExpression(code.val)
 
     visitText = (node) ->
-      buffer(JSON.stringify(node.val))
+      bufferExpression(JSON.stringify(node.val))
 
     visitNodes =
       Text: visitText
       Tag: visitTag
       Block: visitBlock
 
-    parts = []
-    buffer = (str) -> parts.push(str)
+    parts = ['function(){']
+    bufferExpression = (str) -> parts.push(str)
     visit = (node) -> visitNodes[node.type](node)
     visit(node)
 
     toPush = (part) -> 'buf.push(' + JSON.stringify(part)+ ');'
 
-    buffer('\n')
+    bufferExpression('\n')
     return parts.map(toPush).join('\n')
 
 module.exports = Compiler
