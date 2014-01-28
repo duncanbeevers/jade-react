@@ -1,6 +1,18 @@
 isConstant = require('constantinople')
 toConstant = require('constantinople').toConstant
 
+prettyMap = """
+  function map (obj, fn) {
+    if ('number' === typeof obj.length) return obj.map(fn);
+    var result = [], key, hasProp = {}.hasOwnProperty;
+    for (key in obj) hasProp.call(obj, key) && result.push(fn(key, obj[key]));
+    return result;
+  }\n
+  """
+terseMap = """
+  function map(o,f){if('number'===typeof o.length)return o.map(f);var r=[],k,h={}.hasOwnProperty;for(k in o)h.call(o,k)&&r.push(f(k,o[k]));return r;}
+  """
+
 pairSort = (a, b) ->
   if a[0] < b[0]
     -1
@@ -136,16 +148,55 @@ Compiler = (node, options) ->
     visitText = (node) ->
       bufferExpression(indentToDepth(), JSON.stringify(node.val))
 
+    needsMap = false
+    continueIndenting = false
+    visitEach = (node) ->
+      needsMap = true
+      bufferExpression(indentToDepth(), 'map(', node.obj)
+
+      if pretty
+        bufferExpression(', function (')
+      else
+        bufferExpression(',function(')
+      bufferExpression(node.val)
+
+      if pretty
+        bufferExpression(', ')
+      else
+        bufferExpression(',')
+
+      bufferExpression(node.key, ')')
+
+      if pretty
+        bufferExpression(' {\n')
+      else
+        bufferExpression('{')
+
+      depth += 1
+      bufferExpression(indentToDepth(), 'return ')
+      continueIndenting = false
+      for node in node.block.nodes
+        visit(node)
+      depth -= 1
+
+      if pretty
+        bufferExpression(';\n')
+      else
+        bufferExpression(';')
+
+      bufferExpression(indentToDepth(), '})')
+
     visitNodes =
       Text: visitText
       Tag: visitTag
       Block: visitBlock
+      Each: visitEach
+      Code: visitCode
 
     # Setup
     depth = -1
     seenDepth0 = false
 
-    continueIndenting = false
     indentToDepth = ->
       return '' unless pretty
       if continueIndenting
@@ -156,16 +207,23 @@ Compiler = (node, options) ->
         ''
 
     # Open render function body
-    if pretty
-      parts = ['function () {\n  return ']
-    else
-      parts = ['function(){return ']
-
+    parts = []
     bufferExpression = (strs...) -> parts = parts.concat(strs)
     visit = (node) -> visitNodes[node.type](node)
     visit(node)
 
-    # Close function wrapper.
+    # Create the function wrapper.
+    if pretty
+      parts.unshift '  return '
+      if needsMap
+        parts.unshift prettyMap
+      parts.unshift 'function () {\n'
+    else
+      parts.unshift 'return '
+      if needsMap
+        parts.unshift terseMap
+      parts.unshift 'function(){'
+
     if pretty
       bufferExpression(';\n}\n')
     else
@@ -173,7 +231,6 @@ Compiler = (node, options) ->
 
     # Map to jade machine instruction statements;
     toPush = (part) -> 'buf.push(' + JSON.stringify(part)+ ');'
-    console.log(parts.join(''))
     return parts.map(toPush).join('\n')
 
 module.exports = Compiler

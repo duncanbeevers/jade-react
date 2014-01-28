@@ -1,0 +1,1 @@
+function(){function map(o,f){if('number'===typeof o.length)return o.map(f);var r=[],k,h={}.hasOwnProperty;for(k in o)h.call(o,k)&&r.push(f(k,o[k]));return r;}return React.DOM.ul(null,map(this.products,function(product,$index){return React.DOM.li(null,product.name);}));}
