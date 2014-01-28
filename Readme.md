@@ -2,37 +2,44 @@
 
 Compile Jade templates to React de-sugared JSX.
 
-````jade
-div.first
-.second
-a(href="static")
-a(href=dynamic)
-p Static Content
-p= dynamicContent
-p
-  | Text
-p
-  | Multiline Text 1
-  | Multiline Text 2
-ul
-  li List Item
-  li= dynamicListItem
-div.staticClass1(class="staticClass2")
-div.staticClass1(class=dynamicClass2)
-````
+```jade
+.container-fluid.readme
+  .row
+    h1= this.storeName
+    ul
+    each product in this.products
+      li
+        | Product
+        = product.title
+```
 
 into
 
-````javascript
-React.DOM.div({"className":"first"}) +
-React.DOM.div({"className":"second"}) +
-React.DOM.a({"href":"static"}) +
-React.DOM.a({"href":dynamic}) +
-React.DOM.p(null, "Static Content") +
-React.DOM.p(null, dynamicContent) +
-React.DOM.p(null, "Text") +
-React.DOM.p(null, "Multiline Text 1", "Multiline Text 2") +
-React.DOM.ul(null, React.DOM.li(null, "List Item"), React.DOM.li(null, dynamicListItem)) +
-React.DOM.div({"className":"staticClass1 staticClass2"}) +
-React.DOM.div({"className":"staticClass1" + " " + dynamicClass2})
-````
+```javascript
+function () {
+function map (obj, fn) {
+  if ('number' === typeof obj.length) return obj.map(fn);
+  var result = [], key, hasProp = {}.hasOwnProperty;
+  for (key in obj) hasProp.call(obj, key) && result.push(fn(key, obj[key]));
+  return result;
+}
+  return React.DOM.div({
+    "className": "container-fluid readme"
+  },
+    React.DOM.div({
+      "className": "row"
+    },
+      React.DOM.h1(null,
+        this.storeName
+      ),
+      React.DOM.ul(null),
+      map(this.products, function (product, $index) {
+        return React.DOM.li(null,
+          "Product",
+          product.title
+        );
+      })
+    )
+  );
+}
+```
