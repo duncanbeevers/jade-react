@@ -1,14 +1,15 @@
 isConstant = require('constantinople')
 toConstant = require('constantinople').toConstant
 
-prettyMap = """
+prettyMap = '  ' + """
   function map (obj, fn) {
     if ('number' === typeof obj.length) return obj.map(fn);
     var result = [], key, hasProp = {}.hasOwnProperty;
     for (key in obj) hasProp.call(obj, key) && result.push(fn(key, obj[key]));
     return result;
-  }\n
-  """
+  }
+  """.split('\n').join('\n  ') + '\n\n'
+
 terseMap = """
   function map(o,f){if('number'===typeof o.length)return o.map(f);var r=[],k,h={}.hasOwnProperty;for(k in o)h.call(o,k)&&r.push(f(k,o[k]));return r;}
   """
@@ -152,6 +153,7 @@ Compiler = (node, options) ->
     continueIndenting = false
     visitEach = (node) ->
       needsMap = true
+      depth += 1
       bufferExpression(indentToDepth(), 'map(', node.obj)
 
       if pretty
@@ -177,14 +179,19 @@ Compiler = (node, options) ->
       continueIndenting = false
       for node in node.block.nodes
         visit(node)
-      depth -= 1
 
       if pretty
         bufferExpression(';\n')
       else
         bufferExpression(';')
 
-      bufferExpression(indentToDepth(), '})')
+      depth -= 1
+      if pretty
+        bufferExpression(indentToDepth(), '}\n')
+      else
+        bufferExpression(indentToDepth(), '}')
+      depth -= 1
+      bufferExpression(indentToDepth(), ')')
 
     visitNodes =
       Text: visitText
