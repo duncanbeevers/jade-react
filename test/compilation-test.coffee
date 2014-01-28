@@ -9,26 +9,33 @@ render = require('../src/main')
 describe 'compile', ->
   fs = require('fs')
 
-  setupFixtureTests = ->
+  setupFixtureTests = (pretty) ->
     fixturesDir = 'test/fixtures/'
     fixtures = fs.readdirSync(fixturesDir)
     inputs = fixtures.filter (fixture) -> /\.jade$/.test(fixture)
 
     for inputFileName in inputs
-      outputFileName = inputFileName + '.js'
+      if pretty
+        suffix = '.pretty.js'
+      else
+        suffix = '.js'
+
+      outputFileName = inputFileName + suffix
 
       do (inputFileName, outputFileName) ->
-        markup = String(fs.readFileSync(fixturesDir + inputFileName))
-        output = String(fs.readFileSync(fixturesDir + outputFileName))
+        try
+          markup = String(fs.readFileSync(fixturesDir + inputFileName))
+          output = String(fs.readFileSync(fixturesDir + outputFileName))
 
-        it 'compiles ' + inputFileName + ' to ' + outputFileName, ->
-          expect(render).to.transform(markup).into(output)
+          it 'compiles ' + inputFileName + ' to ' + outputFileName, ->
+            options = pretty: pretty
+            expect(render).to.transform(markup, options).into(output)
+        catch setupError
+          it 'failed to setup fixture test for file pair ' + inputFileName + '→' + outputFileName, ->
+            expect(-> throw setupError).not.to.throw()
 
-  try
-    setupFixtureTests()
-  catch setupError
-    it 'should not have failed to setup fixture tests', ->
-      expect(-> throw setupError).not.to.throw()
+  setupFixtureTests(false)
+  setupFixtureTests(true)
 
   it 'should not compile multiple root nodes', ->
     expect(render).transform('p\np\n').to.throw()
