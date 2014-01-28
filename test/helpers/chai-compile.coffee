@@ -7,6 +7,6 @@ chai.use (chai, utils) ->
     transform = @_obj
     new Assertion(-> transform(input))
 
-  Assertion.addMethod 'into', (output) ->
+  Assertion.addMethod 'into', (expectedOutput) ->
     actualOutput = @_obj()
-    new Assertion(output).to.equal(actualOutput)
+    new Assertion(actualOutput).to.equal(expectedOutput)
