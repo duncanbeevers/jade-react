@@ -14,12 +14,7 @@ Compiler = (node, options) ->
 
   compile: ->
     visitTag = (tag) ->
-      if pretty
-        bufferExpression(indentToDepth())
-        bufferExpression('React.DOM.', tag.name, '(')
-      else
-        bufferExpression('React.DOM.', tag.name, '(')
-
+      bufferExpression(indentToDepth(), 'React.DOM.', tag.name, '(')
       visitAttributes(tag.attrs, tag.attributeBlocks)
 
       depth += 1
@@ -136,16 +131,10 @@ Compiler = (node, options) ->
 
     visitCode = (code) ->
       return unless code
-      if pretty
-        bufferExpression(indentToDepth(), code.val)
-      else
-        bufferExpression(code.val)
+      bufferExpression(indentToDepth(), code.val)
 
     visitText = (node) ->
-      if pretty
-        bufferExpression(indentToDepth(), JSON.stringify(node.val))
-      else
-        bufferExpression(JSON.stringify(node.val))
+      bufferExpression(indentToDepth(), JSON.stringify(node.val))
 
     visitNodes =
       Text: visitText
@@ -158,6 +147,7 @@ Compiler = (node, options) ->
 
     continueIndenting = false
     indentToDepth = ->
+      return '' unless pretty
       if continueIndenting
         # depth 1 is implicit in function wrapper
         Array(depth + 3).join('  ')
