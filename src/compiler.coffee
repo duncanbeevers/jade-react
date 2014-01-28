@@ -156,11 +156,13 @@ Compiler = (node, options) ->
     depth = -1
     seenDepth0 = false
 
-    indentToDepth = () ->
-      # depth 1 is implicit in function wrapper
-      if parts.length > 1
+    continueIndenting = false
+    indentToDepth = ->
+      if continueIndenting
+        # depth 1 is implicit in function wrapper
         Array(depth + 3).join('  ')
       else
+        continueIndenting = true
         ''
 
     # Open render function body
