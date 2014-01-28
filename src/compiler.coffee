@@ -11,8 +11,6 @@ pairSort = (a, b) ->
 
 Compiler = (node, options) ->
   pretty = options.pretty
-  if pretty
-    prettyComma = ', '
 
   compile: ->
     visitTag = (tag) ->
