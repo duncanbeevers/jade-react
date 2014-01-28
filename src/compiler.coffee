@@ -18,9 +18,9 @@ Compiler = (node, options) ->
     visitTag = (tag) ->
       if pretty
         bufferExpression(indentToDepth())
-        bufferExpression('React.DOM.' + tag.name + '(')
+        bufferExpression('React.DOM.', tag.name, '(')
       else
-        bufferExpression('React.DOM.' + tag.name + '(')
+        bufferExpression('React.DOM.', tag.name, '(')
 
       visitAttributes(tag.attrs, tag.attributeBlocks)
 
@@ -33,7 +33,7 @@ Compiler = (node, options) ->
 
       if pretty
         if anyArgs
-          bufferExpression('\n' + indentToDepth() + ')')
+          bufferExpression('\n', indentToDepth(), ')')
         else
           bufferExpression(')')
       else
@@ -128,10 +128,10 @@ Compiler = (node, options) ->
       bufferExpression('{')
       if pretty
         depth += 1
-        bufferExpression('\n' + indentToDepth())
+        bufferExpression('\n', indentToDepth())
         bufferExpression(pairs.join(',\n' + indentToDepth()))
         depth -= 1
-        bufferExpression('\n' + indentToDepth())
+        bufferExpression('\n', indentToDepth())
       else
         bufferExpression(pairs.join(','))
       bufferExpression('}')
@@ -139,13 +139,13 @@ Compiler = (node, options) ->
     visitCode = (code) ->
       return unless code
       if pretty
-        bufferExpression(indentToDepth() + code.val)
+        bufferExpression(indentToDepth(), code.val)
       else
         bufferExpression(code.val)
 
     visitText = (node) ->
       if pretty
-        bufferExpression(indentToDepth() + JSON.stringify(node.val))
+        bufferExpression(indentToDepth(), JSON.stringify(node.val))
       else
         bufferExpression(JSON.stringify(node.val))
 
@@ -171,7 +171,7 @@ Compiler = (node, options) ->
     else
       parts = ['function(){return ']
 
-    bufferExpression = (str) -> parts.push(str)
+    bufferExpression = (strs...) -> parts = parts.concat(strs)
     visit = (node) -> visitNodes[node.type](node)
     visit(node)
 
