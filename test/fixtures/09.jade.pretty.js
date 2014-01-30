@@ -1,6 +1,6 @@
 function () {
   return React.DOM.p({
-    "className": "customClass",
-    "title": "customTitle"
-  });
+      "className": "customClass",
+      "title": "customTitle"
+    });
 }

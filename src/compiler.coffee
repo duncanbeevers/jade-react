@@ -140,11 +140,12 @@ Compiler = (node, options) ->
 
       bufferExpression('{')
       if pretty
-        depth += 1
+        depth += 2
         bufferExpression('\n', indentToDepth())
         bufferExpression(pairs.join(',\n' + indentToDepth()))
         depth -= 1
         bufferExpression('\n', indentToDepth())
+        depth -= 1
       else
         bufferExpression(pairs.join(','))
       bufferExpression('}')
