@@ -39,3 +39,6 @@ describe 'compile', ->
 
   it 'should not compile multiple root nodes', ->
     expect(render).transform('p\np\n').to.throw('Component may have no more than one root node')
+
+  it 'should not compile doctype', ->
+    expect(render).transform('doctype html').to.throw('Component may not have doctype tag')

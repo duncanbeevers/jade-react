@@ -204,6 +204,7 @@ Compiler = (node, options) ->
       Block: visitBlock
       Each: visitEach
       Code: visitCode
+      Doctype: -> throw new Error('Component may not have doctype tag')
 
     indentToDepth = ->
       return '' unless pretty
