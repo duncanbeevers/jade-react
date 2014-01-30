@@ -23,9 +23,16 @@ pairSort = (a, b) ->
     0
 
 Compiler = (node, options) ->
-  pretty = options.pretty
-
   compile: ->
+    # Setup
+    pretty            = options.pretty
+    depth             = -1
+    seenDepth0        = false
+    parts             = []
+    seenDepth0        = false
+    needsMap          = false
+    continueIndenting = false
+
     visitTag = (tag) ->
       bufferExpression(indentToDepth(), 'React.DOM.', tag.name, '(')
       visitAttributes(tag.attrs, tag.attributeBlocks)
@@ -149,8 +156,6 @@ Compiler = (node, options) ->
     visitText = (node) ->
       bufferExpression(indentToDepth(), JSON.stringify(node.val))
 
-    needsMap = false
-    continueIndenting = false
     visitEach = (node) ->
       needsMap = true
       depth += 1
@@ -200,10 +205,6 @@ Compiler = (node, options) ->
       Each: visitEach
       Code: visitCode
 
-    # Setup
-    depth = -1
-    seenDepth0 = false
-
     indentToDepth = ->
       return '' unless pretty
       if continueIndenting
@@ -214,7 +215,6 @@ Compiler = (node, options) ->
         ''
 
     # Open render function body
-    parts = []
     bufferExpression = (strs...) -> parts = parts.concat(strs)
     visit = (node) -> visitNodes[node.type](node)
     visit(node)

@@ -38,4 +38,4 @@ describe 'compile', ->
   setupFixtureTests(true)
 
   it 'should not compile multiple root nodes', ->
-    expect(render).transform('p\np\n').to.throw()
+    expect(render).transform('p\np\n').to.throw('Component may have no more than one root node')
