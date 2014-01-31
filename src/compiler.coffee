@@ -1,5 +1,8 @@
-isConstant = require('constantinople')
-toConstant = require('constantinople').toConstant
+isString = (s) -> '\'' == s[0] || '"' == s[0]
+toString = (s) -> s.slice(1, s.length - 1)
+
+arrayCompiler = require('./class-array-expression-compiler')
+expressionCompiler = require('./class-expression-compiler')
 
 prettyMap = '  ' + """
   function map (obj, fn) {
@@ -21,6 +24,25 @@ pairSort = (a, b) ->
     1
   else
     0
+
+partition = (collection, fn) ->
+  left = []
+  right = []
+  for item in collection
+    if fn(item)
+      left.push item
+    else
+      right.push item
+  [left, right]
+
+isArrayExpression = (expression) ->
+  '[' == expression[0] && ']' == expression[expression.length - 1]
+
+joinArrays = (expression) ->
+  if isArrayExpression(expression)
+    expression + '.join(" ")'
+  else
+    expression
 
 Compiler = (node, options) ->
   compile: ->
@@ -83,45 +105,74 @@ Compiler = (node, options) ->
         if i + 1 < len
           bufferExpression(' + \n')
 
-    visitAttributes = (attrs, attributeBlocks) ->
-      unless attrs && attrs.length
-        bufferExpression('null')
-        return
+    normalizeClassExpressions = (expressions) ->
+      # If the expression is an array, we won't peer inside,
+      # and we'll just invoke a join function on the whole expression.
+      [arrayExpressions, expressions] = partition expressions,
+        isArrayExpression
 
+      [stringExpressions, expressions] = partition expressions,
+        isString
+
+      stringClassNames = stringExpressions.map(toString)
+      stringClassNamesExpression = JSON.stringify(stringClassNames.join(' '))
+
+      if stringClassNames.length
+        expressions.unshift(stringClassNamesExpression)
+
+      if arrayExpressions.length
+        for expression in arrayExpressions
+          expressions.push(arrayCompiler(expression))
+
+      if 1 == expressions.length
+        expression = expressions[0]
+      else
+        expression = expressionCompiler(expressions.join('+" "+'))
+
+      return expression
+
+    normalizeAttributes = (attrs) ->
       visited = {}
-      gatheredClassNames = []
+      classExpressions = []
       normalized = {}
 
       for attr in attrs
         name = attr.name
         val = attr.val
 
+        # `class` attributes are automatically treated as `className`
         if 'class' == name
           name = 'className'
 
+        # Only `class`/`className` attributes are extensible.
+        # Every other attribute blows up if its seen twice in a tag
         if 'className' != name && visited[name]
           throw new Error('Duplicate key ' + JSON.stringify(name) + ' is not allowed.')
         visited[name] = true
 
+        # `className` is handled specially.
+        # First, at compile time, constant class names are
+        # gathered and concatenated, like so `foo baz`
+        # Then dynamic components are added as run-time expressions,
+        # concatenating themselves on to the constant component.
         if 'className' == name
-          gatheredClassNames.push val
+          classExpressions.push val
         else
           normalized[name] = val
 
+      # If we ever visited a `className` attribute, we need to
+      # build its normalized value manually.
       if visited['className']
-        constantClassNames = []
-        dynamicClassNames = []
-        for className in gatheredClassNames
-          if isConstant(className)
-            constantClassNames.push toConstant(className)
-          else
-            dynamicClassNames.push className
+        normalized['className'] = normalizeClassExpressions(classExpressions)
 
-        classNames = []
-        if constantClassNames.length
-          classNames.push JSON.stringify(constantClassNames.join(' '))
+      return normalized
 
-        normalized['className'] = classNames.concat(dynamicClassNames).join(' + " " + ')
+    visitAttributes = (attrs, attributeBlocks) ->
+      unless attrs && attrs.length
+        bufferExpression('null')
+        return
+
+      normalized = normalizeAttributes(attrs)
 
       pairs = []
       for name, val of normalized
