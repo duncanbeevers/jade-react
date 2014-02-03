@@ -1,0 +1,8 @@
+.container-fluid.readme
+  .row
+    h1= this.storeName
+    ul
+    each product in this.products
+      li
+        | Product
+        = product.title
