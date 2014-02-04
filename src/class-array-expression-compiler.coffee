@@ -40,7 +40,7 @@ uglifyArrayToStringConcatTransform = do ->
     descend(node, this)
     return node
 
-  new UglifyJS.TreeTransformer(before, after)
+  new UglifyJS.TreeTransformer(before)
 
 module.exports = (expression) ->
   ast = UglifyJS.parse(expression)
